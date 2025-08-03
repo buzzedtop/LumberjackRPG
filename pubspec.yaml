@@ -1,0 +1,59 @@
+name: lumberjack_rpg
+description: A 2D top-down RPG built with Flutter and Flame.
+version: 1.0.0
+
+environment:
+  sdk: '>=2.18.0 <3.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flame: ^1.8.0
+  flame_noise: ^0.1.0
+
+dev_dependencies:
+  image: ^4.2.0
+
+flutter:
+  assets:
+    - assets/player.png
+    - assets/forest.png
+    - assets/mountain.png
+    - assets/cave.png
+    - assets/deep_cave.png
+    - assets/water.png
+    - assets/balsa.png
+    - assets/cedar.png
+    - assets/pine.png
+    - assets/walnut.png
+    - assets/oak.png
+    - assets/maple.png
+    - assets/mahogany.png
+    - assets/hickory.png
+    - assets/wenge.png
+    - assets/ipe.png
+    - assets/black_ironwood.png
+    - assets/lignum_vitae.png
+    - assets/australian_buloke.png
+    - assets/quebracho.png
+    - assets/snakewood.png
+    - assets/iron.png
+    - assets/steel.png
+    - assets/titanium.png
+    - assets/vanadium.png
+    - assets/tungsten.png
+    - assets/osmium.png
+    - assets/iridium.png
+    - assets/chromium.png
+    - assets/wolf.png
+    - assets/boar.png
+    - assets/bandit.png
+    - assets/bear.png
+    - assets/mountain_troll.png
+    - assets/golem.png
+    - assets/goblin.png
+    - assets/cave_troll.png
+    - assets/cave_guardian.png
+    - assets/dragon.png
+    - assets/abyssal_fiend.png
+    - assets/deep_cave_overlord.png
