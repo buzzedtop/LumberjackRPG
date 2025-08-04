@@ -1,31 +1,28 @@
-import 'wood.dart';
-import 'metal.dart';
+const Map<String, Map<String, dynamic>> woodTypes = {
+  'balsa': {'biome': 'forest', 'durability': 1, 'amount': 10},
+  'cedar': {'biome': 'forest', 'durability': 2, 'amount': 12},
+  'pine': {'biome': 'forest', 'durability': 3, 'amount': 15},
+  'walnut': {'biome': 'forest', 'durability': 4, 'amount': 18},
+  'oak': {'biome': 'forest', 'durability': 5, 'amount': 20},
+  'maple': {'biome': 'forest', 'durability': 6, 'amount': 22},
+  'mahogany': {'biome': 'mountain', 'durability': 7, 'amount': 25},
+  'hickory': {'biome': 'mountain', 'durability': 8, 'amount': 28},
+  'wenge': {'biome': 'mountain', 'durability': 9, 'amount': 30},
+  'ipe': {'biome': 'mountain', 'durability': 10, 'amount': 32},
+  'black_ironwood': {'biome': 'cave', 'durability': 11, 'amount': 35},
+  'lignum_vitae': {'biome': 'cave', 'durability': 12, 'amount': 38},
+  'australian_buloke': {'biome': 'deep_cave', 'durability': 13, 'amount': 40},
+  'quebracho': {'biome': 'cave', 'durability': 14, 'amount': 42},
+  'snakewood': {'biome': 'deep_cave', 'durability': 15, 'amount': 45},
+};
 
-final List<Wood> woodTypes = [
-  Wood('Balsa', 90, 'Common', 'Forest', 1, 1.0),
-  Wood('Cedar', 900, 'Common', 'Forest', 3, 1.0),
-  Wood('Pine', 950, 'Common', 'Forest', 3, 1.0),
-  Wood('Walnut', 1010, 'Common', 'Forest', 4, 1.0),
-  Wood('Oak', 1080, 'Common', 'Forest', 5, 1.0),
-  Wood('Maple', 1450, 'Uncommon', 'Forest', 8, 1.0),
-  Wood('Mahogany', 2200, 'Uncommon', 'Forest', 10, 1.0),
-  Wood('Hickory', 2540, 'Uncommon', 'Forest,Mountain', 12, 1.0),
-  Wood('Wenge', 3260, 'Rare', 'Mountain', 15, 1.0),
-  Wood('Ipe', 3684, 'Rare', 'Mountain', 18, 1.0),
-  Wood('Black Ironwood', 3660, 'Rare', 'Cave', 18, 1.0),
-  Wood('Lignum Vitae', 4390, 'Very Rare', 'Cave', 22, 1.1),
-  Wood('Australian Buloke', 5060, 'Very Rare', 'Cave', 25, 1.1),
-  Wood('Quebracho', 4570, 'Very Rare', 'Cave', 23, 1.1),
-  Wood('Snakewood', 3800, 'Very Rare', 'Cave', 20, 1.1),
-];
-
-final List<Metal> metalTypes = [
-  Metal('Iron', 4.0, 'Common', 'Forest,Mountain', 5, 20, 1.0),
-  Metal('Steel', 5.0, 'Common', 'Mountain', 8, 30, 1.0),
-  Metal('Titanium', 6.0, 'Uncommon', 'Mountain', 10, 40, 0.9),
-  Metal('Vanadium', 6.7, 'Uncommon', 'Mountain', 12, 50, 1.0),
-  Metal('Tungsten', 7.5, 'Rare', 'Cave', 20, 80, 1.2),
-  Metal('Osmium', 7.0, 'Very Rare', 'Cave', 18, 70, 1.3),
-  Metal('Iridium', 6.5, 'Very Rare', 'Cave', 15, 60, 1.2),
-  Metal('Chromium', 8.5, 'Very Rare', 'Deep Cave', 25, 90, 1.1),
-];
+const Map<String, Map<String, dynamic>> metalTypes = {
+  'iron': {'biome': 'mountain', 'durability': 5, 'amount': 10},
+  'steel': {'biome': 'mountain', 'durability': 6, 'amount': 12},
+  'titanium': {'biome': 'mountain', 'durability': 7, 'amount': 15},
+  'vanadium': {'biome': 'mountain', 'durability': 8, 'amount': 18},
+  'tungsten': {'biome': 'cave', 'durability': 9, 'amount': 20},
+  'osmium': {'biome': 'cave', 'durability': 10, 'amount': 22},
+  'iridium': {'biome': 'deep_cave', 'durability': 11, 'amount': 25},
+  'chromium': {'biome': 'deep_cave', 'durability': 12, 'amount': 28},
+};

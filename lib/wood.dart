@@ -1,10 +1,22 @@
+import 'constants.dart';
+
 class Wood {
   final String name;
-  final int jankaHardness;
-  final String rarity;
   final String biome;
-  final int damageBonus;
-  final double weightModifier;
+  int durability;
+  int amount;
+  bool isDepleted = false;
 
-  Wood(this.name, this.jankaHardness, this.rarity, this.biome, this.damageBonus, this.weightModifier);
+  Wood(this.name, this.biome)
+      : durability = woodTypes[name]!['durability'] as int,
+        amount = woodTypes[name]!['amount'] as int;
+
+  void chop() {
+    if (!isDepleted) {
+      durability--;
+      if (durability <= 0) {
+        isDepleted = true;
+      }
+    }
+  }
 }

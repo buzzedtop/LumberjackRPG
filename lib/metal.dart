@@ -1,11 +1,22 @@
+import 'constants.dart';
+
 class Metal {
   final String name;
-  final double mohsHardness;
-  final String rarity;
   final String biome;
-  final int damageBonus;
-  final int durabilityBonus;
-  final double weightModifier;
+  int durability;
+  int amount;
+  bool isDepleted = false;
 
-  Metal(this.name, this.mohsHardness, this.rarity, this.biome, this.damageBonus, this.durabilityBonus, this.weightModifier);
+  Metal(this.name, this.biome)
+      : durability = metalTypes[name]!['durability'] as int,
+        amount = metalTypes[name]!['amount'] as int;
+
+  void mine() {
+    if (!isDepleted) {
+      durability--;
+      if (durability <= 0) {
+        isDepleted = true;
+      }
+    }
+  }
 }

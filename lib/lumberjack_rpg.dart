@@ -22,7 +22,7 @@ class LumberjackRPG extends FlameGame with TapDetector, KeyboardEvents {
   final PerlinNoise noise = PerlinNoise(frequency: 0.1, seed: 42);
 
   // Toggle between pre-generated and runtime-generated assets
-  static const bool usePreGeneratedAssets = true; // Set to false for runtime generation
+  static const bool usePreGeneratedAssets = false; // Runtime generation
 
   // Cache for generated images
   final Map<String, ui.Image> _imageCache = {};
@@ -32,10 +32,8 @@ class LumberjackRPG extends FlameGame with TapDetector, KeyboardEvents {
     player = Lumberjack();
     gameMap = GameMap(42);
 
-    // Load or generate player sprite
-    final playerImage = usePreGeneratedAssets
-        ? await images.load('entities/player.png')
-        : await _generateEntityImage('player');
+    // Generate player sprite
+    final playerImage = await _generateEntityImage('player');
     add(SpriteComponent.fromImage(
       playerImage,
       position: playerPosition,
@@ -49,6 +47,7 @@ class LumberjackRPG extends FlameGame with TapDetector, KeyboardEvents {
       TileType.cave: 'cave',
       TileType.deepCave: 'deep_cave',
       TileType.water: 'water',
+      TileType.road: 'road',
     };
     final mapColors = {
       'forest': img.ColorRgb8(34, 139, 34),
@@ -56,6 +55,7 @@ class LumberjackRPG extends FlameGame with TapDetector, KeyboardEvents {
       'cave': img.ColorRgb8(105, 105, 105),
       'deep_cave': img.ColorRgb8(47, 79, 79),
       'water': img.ColorRgb8(0, 105, 148),
+      'road': img.ColorRgb8(139, 69, 19), // Brown for dirt roads
     };
     for (int x = 0; x < gameMap.width; x++) {
       for (int y = 0; y < gameMap.height; y++) {
@@ -64,16 +64,12 @@ class LumberjackRPG extends FlameGame with TapDetector, KeyboardEvents {
         int subY = (y % 2);
         String key = '${biome}_${subX}_${subY}';
         ui.Image tileImage;
-        if (usePreGeneratedAssets) {
-          tileImage = await images.load('map/${key}.png');
-        } else {
-          if (!_imageCache.containsKey(key)) {
-            final mapImage = _generateMapImage(biome, mapColors[biome]!);
-            final subImage = img.copyCrop(mapImage, subX * 32, subY * 32, 32, 32);
-            _imageCache[key] = await _convertToUiImage(subImage);
-          }
-          tileImage = _imageCache[key]!;
+        if (!_imageCache.containsKey(key)) {
+          final mapImage = _generateMapImage(biome, mapColors[biome]!);
+          final subImage = img.copyCrop(mapImage, subX * 32, subY * 32, 32, 32);
+          _imageCache[key] = await _convertToUiImage(subImage);
         }
+        tileImage = _imageCache[key]!;
         add(SpriteComponent.fromImage(
           tileImage,
           position: Vector2(x * 32.0, y * 32.0),
@@ -82,12 +78,10 @@ class LumberjackRPG extends FlameGame with TapDetector, KeyboardEvents {
       }
     }
 
-    // Load or generate wood resources
+    // Generate wood resources
     gameMap.woodResources.forEach((pos, wood) async {
       final name = wood.name.toLowerCase().replaceAll(' ', '_');
-      final image = usePreGeneratedAssets
-          ? await images.load('resources/$name.png')
-          : await _generateResourceImage(name, wood.biome);
+      final image = await _generateResourceImage(name, wood.biome);
       add(SpriteComponent.fromImage(
         image,
         position: pos * 32,
@@ -95,12 +89,10 @@ class LumberjackRPG extends FlameGame with TapDetector, KeyboardEvents {
       ));
     });
 
-    // Load or generate metal resources
+    // Generate metal resources
     gameMap.metalResources.forEach((pos, metal) async {
       final name = metal.name.toLowerCase();
-      final image = usePreGeneratedAssets
-          ? await images.load('resources/$name.png')
-          : await _generateResourceImage(name, metal.biome);
+      final image = await _generateResourceImage(name, metal.biome);
       add(SpriteComponent.fromImage(
         image,
         position: pos * 32,
@@ -145,6 +137,12 @@ class LumberjackRPG extends FlameGame with TapDetector, KeyboardEvents {
       img.drawLine(image, 16, 20, 48, 20, img.ColorRgb8(0, 150, 200));
       img.drawLine(image, 12, 28, 52, 28, img.ColorRgb8(0, 150, 200));
       img.drawRect(image, 0, 0, 63, 63, img.ColorRgb8(0, 80, 120));
+    } else if (name == 'road') {
+      img.fillRect(image, 0, 0, 63, 63, color);
+      _addPerlinNoise(image, color, 0.05);
+      img.drawLine(image, 16, 0, 16, 63, img.ColorRgb8(100, 50, 10));
+      img.drawLine(image, 48, 0, 48, 63, img.ColorRgb8(100, 50, 10));
+      img.drawRect(image, 0, 0, 63, 63, img.ColorRgb8(80, 40, 10));
     }
     return image;
   }
@@ -339,7 +337,8 @@ class LumberjackRPG extends FlameGame with TapDetector, KeyboardEvents {
         {'name': 'abyssal_fiend', 'chance': 0.4, 'level': 11},
         {'name': 'deep_cave_overlord', 'chance': 0.3, 'level': 12},
       ],
-      TileType.water: [], // No monsters in water
+      TileType.water: [],
+      TileType.road: [], // No monsters on roads
     };
 
     // Spawn monsters
@@ -360,10 +359,8 @@ class LumberjackRPG extends FlameGame with TapDetector, KeyboardEvents {
               final monster = Monster(monsterName, level: monsterLevel);
               monsters.add(monster);
 
-              // Load or generate monster sprite
-              final monsterImage = usePreGeneratedAssets
-                  ? await images.load('entities/$monsterName.png')
-                  : await _generateEntityImage(monsterName);
+              // Generate monster sprite
+              final monsterImage = await _generateEntityImage(monsterName);
               add(SpriteComponent.fromImage(
                 monsterImage,
                 position: Vector2(x * 32.0, y * 32.0),
@@ -472,4 +469,56 @@ class LumberjackRPG extends FlameGame with TapDetector, KeyboardEvents {
       ];
 
       for (var pos in adjacentTiles) {
-        final targetTile
+        final targetTile = (pos / 32).floor();
+        if (targetTile.x < 0 || targetTile.x >= gameMap.width || targetTile.y < 0 || targetTile.y >= gameMap.height) {
+          continue;
+        }
+
+        final monster = monsters.firstWhereOrNull(
+          (m) => m.position.x == targetTile.x && m.position.y == targetTile.y,
+        );
+        if (monster != null) {
+          isAttacking = true;
+          player.attack(monster);
+          if (monster.isDead) {
+            monsters.remove(monster);
+            removeWhere((component) => component is SpriteComponent && component.position == pos);
+          }
+          return;
+        }
+
+        final wood = gameMap.woodResources[Vector2(targetTile.x, targetTile.y)];
+        if (wood != null) {
+          isChopping = true;
+          player.chopWood(wood);
+          if (wood.isDepleted) {
+            gameMap.woodResources.remove(Vector2(targetTile.x, targetTile.y));
+            removeWhere((component) => component is SpriteComponent && component.position == pos && component.size == Vector2(16, 16));
+          }
+          return;
+        }
+
+        final metal = gameMap.metalResources[Vector2(targetTile.x, targetTile.y)];
+        if (metal != null) {
+          isMining = true;
+          player.mineMetal(metal);
+          if (metal.isDepleted) {
+            gameMap.metalResources.remove(Vector2(targetTile.x, targetTile.y));
+            removeWhere((component) => component is SpriteComponent && component.position == pos && component.size == Vector2(16, 16));
+          }
+          return;
+        }
+      }
+    }
+  }
+}
+
+// Extension to allow null-safe firstWhere
+extension IterableExtension<T> on Iterable<T> {
+  T? firstWhereOrNull(bool Function(T) test) {
+    for (var element in this) {
+      if (test(element)) return element;
+    }
+    return null;
+  }
+}
