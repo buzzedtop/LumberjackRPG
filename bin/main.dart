@@ -13,6 +13,7 @@ void main() {
   print('╚════════════════════════════════════════════════════════════════════╝');
   print('');
   print('A medieval lumberjack adventure with building mechanics and dungeons!');
+  print('⏰ MOVE-BASED TIME SYSTEM: Every action advances game time!');
   print('');
   
   final game = GameState(mapSize: 42);
@@ -21,6 +22,7 @@ void main() {
   print('✓ Map generated (${game.gameMap.width}x${game.gameMap.height})');
   print('✓ Town created: ${game.town.name}');
   print('✓ Dungeon entrance: Well in town center');
+  print('✓ Starting time: ${game.gameTime.getTimeString()}');
   print('');
   
   bool running = true;
@@ -40,11 +42,14 @@ void main() {
         break;
     }
     
-    game.advanceTurn();
+    // Note: advanceTurn() is now called within each action method
+    // This ensures proper time tracking for different action durations
   }
   
   print('\nThanks for playing LumberjackRPG!');
   print('Final Statistics:');
+  print('  Game Time: ${game.gameTime.getTimeString()}');
+  print('  Total Days: ${game.gameTime.day}');
   print('  Turns played: ${game.turnCount}');
   print('  Player Level: ${game.player.level}');
   print('  Buildings constructed: ${game.town.buildings.length}');
@@ -61,14 +66,15 @@ void displayGameState(GameState game) {
 
 bool explorationMode(GameState game) {
   print('\n--- EXPLORATION MODE ---');
-  print('Actions:');
-  print('  [m] Move');
-  print('  [c] Chop wood');
-  print('  [n] Mine metal');
-  print('  [a] Attack monster');
+  print('Actions (each takes time):');
+  print('  [m] Move (10 min)');
+  print('  [c] Chop wood (30 min)');
+  print('  [n] Mine metal (45 min)');
+  print('  [r] Rest (1 hour, restores health)');
+  print('  [a] Attack monster (15 min per attack)');
   print('  [t] Enter town (if nearby)');
-  print('  [i] Show inventory');
-  print('  [s] Show map info');
+  print('  [i] Show inventory (free)');
+  print('  [s] Show map info (free)');
   print('  [q] Quit game');
   
   stdout.write('\nChoose action: ');
@@ -84,12 +90,16 @@ bool explorationMode(GameState game) {
     case 'n':
       mineMetal(game);
       break;
+    case 'r':
+      restPlayer(game);
+      break;
     case 'a':
       attackMonster(game);
       break;
     case 't':
       if (game.isInTown()) {
         game.enterTown();
+        game.advanceTurn(timeMinutes: 5); // Entering town takes 5 minutes
         print('\n>>> Entering ${game.town.name}... <<<');
       } else {
         print('\nYou are not near the town!');
@@ -209,37 +219,32 @@ void movePlayer(GameState game) {
   stdout.write('Direction: ');
   final dir = stdin.readLineSync()?.toLowerCase().trim() ?? '';
   
-  Vector2? newPos;
+  int dx = 0, dy = 0;
   switch (dir) {
     case 'w':
-      newPos = Vector2(game.playerPosition.x, game.playerPosition.y - 32);
+      dy = -1;
       break;
     case 's':
-      newPos = Vector2(game.playerPosition.x, game.playerPosition.y + 32);
+      dy = 1;
       break;
     case 'a':
-      newPos = Vector2(game.playerPosition.x - 32, game.playerPosition.y);
+      dx = -1;
       break;
     case 'd':
-      newPos = Vector2(game.playerPosition.x + 32, game.playerPosition.y);
+      dx = 1;
       break;
     default:
       print('Invalid direction!');
       return;
   }
   
-  final targetTile = (newPos / 32).floor();
-  if (targetTile.x >= 0 && targetTile.x < game.gameMap.width &&
-      targetTile.y >= 0 && targetTile.y < game.gameMap.height &&
-      game.gameMap.tiles[targetTile.x.toInt()][targetTile.y.toInt()] != TileType.water) {
-    game.playerPosition = newPos;
-    print('✓ Moved to (${targetTile.x.toInt()}, ${targetTile.y.toInt()})');
-    
-    final tileType = game.gameMap.tiles[targetTile.x.toInt()][targetTile.y.toInt()];
-    print('  Terrain: ${tileType.toString().split('.').last}');
-  } else {
-    print('Cannot move there (water or out of bounds)!');
-  }
+  game.movePlayer(dx, dy); // This advances time by 10 minutes
+  final playerTile = (game.playerPosition / 32).floor();
+  print('✓ Moved to (${playerTile.x.toInt()}, ${playerTile.y.toInt()})');
+  
+  final tileType = game.gameMap.tiles[playerTile.x.toInt()][playerTile.y.toInt()];
+  print('  Terrain: ${tileType.toString().split('.').last}');
+  print('  Time passed: 10 minutes');
 }
 
 void chopWood(GameState game) {
@@ -247,13 +252,13 @@ void chopWood(GameState game) {
   final wood = game.gameMap.woodResources[Vector2(playerTile.x, playerTile.y)];
   
   if (wood != null) {
-    game.player.chopWood(wood);
+    game.chopWood(); // This advances time by 30 minutes
     print('\n✓ Chopped ${wood.name}!');
     print('  Gained: ${wood.amount} wood');
     print('  Durability: ${wood.durability}/${wood.maxDurability}');
+    print('  Time passed: 30 minutes');
     
     if (wood.isDepleted) {
-      game.gameMap.woodResources.remove(Vector2(playerTile.x, playerTile.y));
       print('  Resource depleted!');
     }
   } else {
@@ -266,18 +271,29 @@ void mineMetal(GameState game) {
   final metal = game.gameMap.metalResources[Vector2(playerTile.x, playerTile.y)];
   
   if (metal != null) {
-    game.player.mineMetal(metal);
+    game.mineMetal(); // This advances time by 45 minutes
     print('\n✓ Mined ${metal.name}!');
     print('  Gained: ${metal.amount} metal');
     print('  Durability: ${metal.durability}/${metal.maxDurability}');
+    print('  Time passed: 45 minutes');
     
     if (metal.isDepleted) {
-      game.gameMap.metalResources.remove(Vector2(playerTile.x, playerTile.y));
       print('  Resource depleted!');
     }
   } else {
     print('\nNo metal resource at this location!');
   }
+}
+
+void restPlayer(GameState game) {
+  final healthBefore = game.player.health;
+  game.rest(); // This advances time by 60 minutes
+  final healthGained = game.player.health - healthBefore;
+  
+  print('\n✓ You rest for an hour...');
+  print('  Health restored: +$healthGained HP');
+  print('  Current health: ${game.player.health}/${game.player.maxHealth}');
+  print('  Time passed: 1 hour');
 }
 
 void attackMonster(GameState game) {
@@ -377,9 +393,10 @@ void buildStructure(GameState game) {
   // Generate unique building ID
   final buildingId = '$name-${game.town.buildings.length + 1}';
   
-  if (game.constructBuilding(buildingId, type)) {
+  if (game.constructBuildingWithTime(buildingId, type)) { // This advances time by 2 hours
     print('\n✓ ${name} constructed successfully!');
     print('  Building ID: $buildingId');
+    print('  Time passed: 2 hours');
   } else {
     print('\n✗ Not enough resources to build ${name}!');
     
@@ -431,18 +448,17 @@ void fightDungeonMonster(GameState game) {
   final target = aliveMonsters[choice - 1];
   print('\n>>> Attacking ${target.name}! <<<');
   
-  game.player.attack(target);
+  game.attackMonster(target); // This advances time by 15 minutes
   print('Dealt ${game.player.axe.damage} damage!');
   print('${target.name} HP: ${target.health}/${target.maxHealth}');
+  print('Time passed: 15 minutes');
   
   if (target.isDead) {
     print('\n✓ ${target.name} defeated!');
     print('  Gained ${target.level * 20} XP!');
   } else {
-    // Monster counter-attacks
-    final damage = target.damage;
-    game.player.health -= damage;
-    print('\n${target.name} counter-attacks for $damage damage!');
+    // Monster counter-attacks (already handled in game.attackMonster)
+    print('\n${target.name} counter-attacks!');
     print('Your HP: ${game.player.health}/${game.player.maxHealth}');
     
     if (game.player.health <= 0) {
@@ -450,6 +466,7 @@ void fightDungeonMonster(GameState game) {
       print('║                        GAME OVER                                   ║');
       print('╚════════════════════════════════════════════════════════════════════╝');
       print('You were defeated by ${target.name}!');
+      print('Final game time: ${game.gameTime.getTimeString()}');
       exit(0);
     }
   }
@@ -473,6 +490,8 @@ void collectTreasure(GameState game) {
     game.town.addResource(item, amount);
     print('  $item: $amount');
   });
+  game.advanceTurn(timeMinutes: 20); // Collecting treasure takes 20 minutes
+  print('Time passed: 20 minutes');
 }
 
 Building _getBuilding(BuildingType type) {

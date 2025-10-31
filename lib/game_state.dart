@@ -10,6 +10,44 @@ import 'metal.dart';
 
 enum GameMode { exploration, town, dungeon }
 
+class GameTime {
+  int day = 1;
+  int hour = 8; // Start at 8 AM
+  int minute = 0;
+  int totalMinutes = 0; // Total game time in minutes
+  
+  void advanceTime(int minutes) {
+    minute += minutes;
+    totalMinutes += minutes;
+    
+    while (minute >= 60) {
+      minute -= 60;
+      hour++;
+    }
+    
+    while (hour >= 24) {
+      hour -= 24;
+      day++;
+    }
+  }
+  
+  String getTimeString() {
+    final period = hour >= 12 ? 'PM' : 'AM';
+    final displayHour = hour == 0 ? 12 : (hour > 12 ? hour - 12 : hour);
+    return 'Day $day, $displayHour:${minute.toString().padLeft(2, '0')} $period';
+  }
+  
+  String getTimeOfDay() {
+    if (hour >= 5 && hour < 12) return 'Morning';
+    if (hour >= 12 && hour < 17) return 'Afternoon';
+    if (hour >= 17 && hour < 21) return 'Evening';
+    return 'Night';
+  }
+  
+  bool isNight() => hour < 6 || hour >= 22;
+  bool isDaytime() => !isNight();
+}
+
 class GameState {
   late Lumberjack player;
   late GameMap gameMap;
@@ -19,10 +57,12 @@ class GameState {
   Vector2 playerPosition = Vector2(50, 50);
   GameMode currentMode = GameMode.exploration;
   int turnCount = 0;
+  late GameTime gameTime;
   
   GameState({int mapSize = 42, int? seed}) {
     player = Lumberjack();
     gameMap = GameMap(mapSize, mapSize);
+    gameTime = GameTime();
     
     // Create town at the center of the map
     final townPos = Vector2((mapSize / 2).floorToDouble(), (mapSize / 2).floorToDouble());
@@ -44,13 +84,111 @@ class GameState {
     );
   }
 
-  void advanceTurn() {
+  // Advance turn - called after EVERY player action
+  void advanceTurn({int timeMinutes = 10}) {
     turnCount++;
+    gameTime.advanceTime(timeMinutes);
     
-    // Produce resources in town
-    if (currentMode == GameMode.town || currentMode == GameMode.exploration) {
+    // Check if a new day started
+    final wasNight = gameTime.hour >= 22 || gameTime.hour < 6;
+    
+    // Produce resources in town every hour (6 game hours = 1 production cycle)
+    if (gameTime.totalMinutes % 360 == 0) {
       town.produceResources();
     }
+    
+    // Night time: increased monster danger (could spawn more monsters)
+    if (gameTime.isNight() && currentMode == GameMode.exploration) {
+      // Night-time effects (monsters more dangerous, etc.)
+      // This is a placeholder for future enhancement
+    }
+    
+    // Day transitions
+    if (gameTime.hour == 0 && gameTime.minute < timeMinutes) {
+      // New day started - could trigger special events
+      _onNewDay();
+    }
+  }
+  
+  void _onNewDay() {
+    // New day effects
+    // Buildings produce accumulated resources
+    town.produceResources();
+    
+    // Player could get a small health regeneration
+    if (currentMode == GameMode.town) {
+      player.health = (player.health + 10).clamp(0, player.maxHealth);
+    }
+  }
+  
+  // Move action - costs 10 minutes
+  void movePlayer(int dx, int dy) {
+    final newPos = Vector2(
+      playerPosition.x + (dx * 32),
+      playerPosition.y + (dy * 32),
+    );
+    
+    final targetTile = (newPos / 32).floor();
+    if (targetTile.x >= 0 && targetTile.x < gameMap.width &&
+        targetTile.y >= 0 && targetTile.y < gameMap.height &&
+        gameMap.tiles[targetTile.x.toInt()][targetTile.y.toInt()] != TileType.water) {
+      playerPosition = newPos;
+      advanceTurn(timeMinutes: 10); // Moving takes 10 minutes
+    }
+  }
+  
+  // Chop wood - costs 30 minutes
+  void chopWood() {
+    final playerTile = (playerPosition / 32).floor();
+    final wood = gameMap.woodResources[Vector2(playerTile.x, playerTile.y)];
+    
+    if (wood != null && !wood.isDepleted) {
+      player.chopWood(wood);
+      advanceTurn(timeMinutes: 30); // Chopping takes 30 minutes
+      
+      if (wood.isDepleted) {
+        gameMap.woodResources.remove(Vector2(playerTile.x, playerTile.y));
+      }
+    }
+  }
+  
+  // Mine metal - costs 45 minutes
+  void mineMetal() {
+    final playerTile = (playerPosition / 32).floor();
+    final metal = gameMap.metalResources[Vector2(playerTile.x, playerTile.y)];
+    
+    if (metal != null && !metal.isDepleted) {
+      player.mineMetal(metal);
+      advanceTurn(timeMinutes: 45); // Mining takes 45 minutes
+      
+      if (metal.isDepleted) {
+        gameMap.metalResources.remove(Vector2(playerTile.x, playerTile.y));
+      }
+    }
+  }
+  
+  // Combat action - costs 15 minutes per attack
+  void attackMonster(Monster monster) {
+    if (!monster.isDead) {
+      player.attack(monster);
+      advanceTurn(timeMinutes: 15); // Combat takes 15 minutes
+    }
+  }
+  
+  // Building construction - costs 2 hours (120 minutes)
+  bool constructBuildingWithTime(String buildingId, BuildingType type) {
+    final success = constructBuilding(buildingId, type);
+    if (success) {
+      advanceTurn(timeMinutes: 120); // Building takes 2 hours
+    }
+    return success;
+  }
+  
+  // Resting - costs 1 hour, restores health
+  void rest() {
+    final healAmount = (player.maxHealth * 0.25).round();
+    player.health = (player.health + healAmount).clamp(0, player.maxHealth);
+    advanceTurn(timeMinutes: 60); // Resting takes 1 hour
   }
 
   bool isInTown() {
@@ -128,6 +266,7 @@ class GameState {
     buffer.writeln('║              LUMBERJACK RPG - Terminal Edition                     ║');
     buffer.writeln('╚════════════════════════════════════════════════════════════════════╝');
     buffer.writeln('');
+    buffer.writeln('Time: ${gameTime.getTimeString()} (${gameTime.getTimeOfDay()})');
     buffer.writeln('Turn: $turnCount');
     buffer.writeln('Mode: ${currentMode.toString().split('.').last}');
     buffer.writeln('Position: (${(playerPosition.x / 32).floor()}, ${(playerPosition.y / 32).floor()})');
@@ -137,6 +276,12 @@ class GameState {
     buffer.writeln('  Health: ${player.health}/${player.maxHealth}');
     buffer.writeln('  XP: ${player.experience}/${player.level * 100}');
     buffer.writeln('  Axe: ${player.axe.type.toString().split('.').last} (Damage: ${player.axe.damage})');
+    
+    // Add time-based warnings
+    if (gameTime.isNight()) {
+      buffer.writeln('');
+      buffer.writeln('⚠️  It is night! Monsters are more dangerous.');
+    }
     
     return buffer.toString();
   }
