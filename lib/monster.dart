@@ -3,9 +3,9 @@ import 'package:vector_math/vector_math.dart';
 class Monster {
   final String name;
   final int level;
-  int health;
-  int maxHealth;
-  int damage;
+  late int health;
+  late int maxHealth;
+  late int damage;
   Vector2 position;
   bool isDead = false;
 

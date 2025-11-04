@@ -1,0 +1,9 @@
+name: lumberjack_terminal_runner
+description: Dart-only runner for LumberjackRPG terminal edition (uses core lib via relative imports)
+version: 0.0.1
+environment:
+  sdk: '>=2.18.0 <4.0.0'
+
+dependencies:
+  vector_math: ^2.1.0
+  # Removed flame_noise to avoid pulling Flame/Flutter types into the Dart-only runner

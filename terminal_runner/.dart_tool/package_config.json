@@ -1,0 +1,23 @@
+{
+  "configVersion": 2,
+  "packages": [
+    {
+      "name": "vector_math",
+      "rootUri": "file:///C:/Users/Veteran/AppData/Local/Pub/Cache/hosted/pub.dev/vector_math-2.1.4",
+      "packageUri": "lib/",
+      "languageVersion": "2.14"
+    },
+    {
+      "name": "lumberjack_terminal_runner",
+      "rootUri": "../",
+      "packageUri": "lib/",
+      "languageVersion": "2.18"
+    }
+  ],
+  "generated": "2025-11-04T04:08:11.588478Z",
+  "generator": "pub",
+  "generatorVersion": "3.7.2",
+  "flutterRoot": "file:///C:/Users/Veteran/flutter",
+  "flutterVersion": "3.29.2",
+  "pubCache": "file:///C:/Users/Veteran/AppData/Local/Pub/Cache"
+}
