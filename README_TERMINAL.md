@@ -1,5 +1,7 @@
 # LumberjackRPG - Terminal Edition
 
+> **Looking for the GUI version?** See [README.md](README.md) for instructions on running the Flame engine GUI with graphics.
+
 ## Overview
 LumberjackRPG has been enhanced to support both terminal-based gameplay and GUI gameplay (Flutter). This allows you to:
 - Play the game in a terminal with full building mechanics
