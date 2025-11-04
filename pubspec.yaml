@@ -1,9 +1,13 @@
 name: lumberjack_rpg
-description: A 2D top-down RPG built with Flutter and Flame.
-version: 1.0.0
+description: A 2D top-down RPG built with Flutter and Flame, with terminal support. Available on iOS, Android, Web, and Desktop.
+version: 1.1.0
+publish_to: 'none'
 
 environment:
   sdk: '>=2.18.0 <3.0.0'
+
+executables:
+  lumberjack_rpg: main
 
 dependencies:
   flutter:
@@ -18,7 +22,11 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^2.0.0
 
+# Flutter configuration
 flutter:
+  uses-material-design: true
+  
+  # Game assets
   assets:
     - assets/map/forest_0_0.png
     - assets/map/forest_0_1.png
