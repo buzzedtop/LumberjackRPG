@@ -17,6 +17,14 @@ class CharacterConfig {
   
   /// Enable/disable SVG caching
   static bool cacheSvgs = true;
+  
+  /// Reset configuration to defaults (useful for testing)
+  static void reset() {
+    currentMode = RenderMode.unicode;
+    useFallback = true;
+    svgBasePath = 'assets/svg/';
+    cacheSvgs = true;
+  }
 }
 
 /// Represents a character that can be rendered in multiple formats

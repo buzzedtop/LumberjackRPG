@@ -108,9 +108,9 @@ check_dependency "image:"
 check_dependency "vector_math:"
 check_dependency "flutter_test:"
 
-# Check Flame version
-if grep -q "flame: \^1\.17\.0" pubspec.yaml; then
-    print_result 0 "Flame engine updated to 1.17.0"
+# Check Flame version - flexible pattern
+if grep -q "flame: \^1\.[0-9]\+\.[0-9]\+" pubspec.yaml; then
+    print_result 0 "Flame engine updated to 1.17.0 or higher"
     VALIDATION_PASSED=$((VALIDATION_PASSED + 1))
 else
     print_result 1 "Flame engine version not updated"

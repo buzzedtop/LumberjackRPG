@@ -229,6 +229,7 @@ void main() {
           
           // If moved to water, position should not change
           final newTile = (gameState.playerPosition / 32).floor();
+          // Bounds check BEFORE accessing array
           if (newTile.x >= 0 && newTile.x < gameState.gameMap.width &&
               newTile.y >= 0 && newTile.y < gameState.gameMap.height) {
             final tileType = gameState.gameMap.tiles[newTile.x.toInt()][newTile.y.toInt()];

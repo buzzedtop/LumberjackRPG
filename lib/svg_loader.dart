@@ -1,5 +1,6 @@
 import 'dart:ui' as ui;
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter/material.dart';
 import 'character_system.dart';
@@ -32,7 +33,7 @@ class SvgCharacterLoader {
       
       return picture;
     } catch (e) {
-      print('Error loading SVG from $assetPath: $e');
+      debugPrint('Error loading SVG from $assetPath: $e');
       return null;
     }
   }
@@ -42,6 +43,8 @@ class SvgCharacterLoader {
     String assetPath, {
     double width = 32.0,
     double height = 32.0,
+    double sourceWidth = 100.0,  // Default SVG viewBox width
+    double sourceHeight = 100.0, // Default SVG viewBox height
   }) async {
     final cacheKey = '${assetPath}_${width}x$height';
     
@@ -56,7 +59,7 @@ class SvgCharacterLoader {
       
       final ui.PictureRecorder recorder = ui.PictureRecorder();
       final Canvas canvas = Canvas(recorder);
-      canvas.scale(width / 100, height / 100); // Assuming 100x100 SVG viewBox
+      canvas.scale(width / sourceWidth, height / sourceHeight);
       canvas.drawPicture(picture);
       
       final ui.Picture scaledPicture = recorder.endRecording();
@@ -72,7 +75,7 @@ class SvgCharacterLoader {
       
       return image;
     } catch (e) {
-      print('Error converting SVG to image: $e');
+      debugPrint('Error converting SVG to image: $e');
       return null;
     }
   }
