@@ -12,8 +12,8 @@ executables:
 dependencies:
   flutter:
     sdk: flutter
-  flame: ^1.8.0
-  flame_noise: ^0.1.0
+  flame: ^1.17.0
+  flame_noise: ^0.1.1+6
   image: ^4.2.0
   vector_math: ^2.1.0
 
