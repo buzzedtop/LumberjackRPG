@@ -13,7 +13,8 @@ dependencies:
   flutter:
     sdk: flutter
   flame: ^1.30.1
-  flame_noise: ^0.1.0
+  flame_noise: ^0.1.1+6
+  flutter_svg: ^2.0.9
   image: ^4.2.0
   vector_math: ^2.1.0
 
@@ -28,6 +29,7 @@ flutter:
   
   # Game assets
   assets:
+    # Map tiles
     - assets/map/forest_0_0.png
     - assets/map/forest_0_1.png
     - assets/map/forest_1_0.png
@@ -52,6 +54,7 @@ flutter:
     - assets/map/road_0_1.png
     - assets/map/road_1_0.png
     - assets/map/road_1_1.png
+    # Resource sprites
     - assets/resources/balsa.png
     - assets/resources/cedar.png
     - assets/resources/pine.png
@@ -75,6 +78,7 @@ flutter:
     - assets/resources/osmium.png
     - assets/resources/iridium.png
     - assets/resources/chromium.png
+    # Entity sprites
     - assets/entities/player.png
     - assets/entities/wolf.png
     - assets/entities/boar.png
@@ -88,3 +92,12 @@ flutter:
     - assets/entities/dragon.png
     - assets/entities/abyssal_fiend.png
     - assets/entities/deep_cave_overlord.png
+    # SVG characters (new!)
+    - assets/svg/
+    - assets/svg/player.svg
+    - assets/svg/terrain/
+    - assets/svg/monsters/
+    - assets/svg/buildings/
+    - assets/svg/resources/
+    - assets/svg/items/
+    - assets/svg/ui/
